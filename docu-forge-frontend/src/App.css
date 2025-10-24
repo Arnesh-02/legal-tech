@@ -1,339 +1,481 @@
-/* --- Global Styles & Layout --- */
-html, body, #root {
+/* 
+
+
+/* --- General Body Styles --- */
+body {
   margin: 0;
-  padding: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 100%;
   height: 100%;
+  background-color: #f4f7f9; /* A light background for the page */
 }
 
-* {
-  box-sizing: border-box;
+/* --- Main Navbar Container --- */
+.navbar {
+  display: flex;
+  justify-content: space-between; /* Pushes brand to the left and links/profile to the right */
+  align-items: center;
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* --- Brand/Logo Styling --- */
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  text-decoration: none; /* In case you wrap it in a Link */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+.navbar-brand:hover {
+  color: #4a5568; /* Slightly lighter color on hover */
 }
 
 
-/* --- Home Page Styles --- */
-.home-container {
-  flex: 1;
+/* --- Right Side of Navbar --- */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Space between links and profile */
+}
+
+
+/* --- Navigation Links --- */
+.navbar-links {
+  display: flex;
+  gap: 1.5rem; /* Space between each link */
+}
+
+.navbar-links a {
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative; /* Needed for the underline effect */
+  transition: color 0.3s ease;
+}
+
+/* Interactive hover effect for links */
+.navbar-links a:hover {
+  color: #0056b3; /* A primary color for hover state */
+}
+
+/* Cool animated underline effect */
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0); /* Starts with no width */
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #0056b3;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.navbar-links a:hover::after {
+  transform: scaleX(1); /* Expands to full width on hover */
+  transform-origin: bottom left;
+}
+
+/* --- Profile Section --- */
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Space between avatar and name */
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px; /* Pill shape */
+  transition: background-color 0.3s ease;
+}
+
+.navbar-profile:hover {
+  background-color: #edf2f7; /* Light gray background on hover */
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* Perfect circle */
+  background-color: #007bff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.profile-name {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* --- Main Layout & Panels --- */
+.founders-page-container {
+  /* Give some breathing room from the navbar */
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #f8f9fa; /* Light gray background */
+  min-height: calc(100vh - 70px); /* Adjust 70px to your navbar's height */
+}
+
+/* --- Form Panel --- */
+.form-panel {
+  max-height: 85vh;
+  overflow-y: auto;
+  padding-right: 1rem; /* Space for the scrollbar */
+}
+
+/* Nicer scrollbar for webkit browsers */
+.form-panel::-webkit-scrollbar {
+  width: 8px;
+}
+.form-panel::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+.form-panel::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+/* --- Preview Panel --- */
+.preview-panel {
+  max-height: 85vh;
+  overflow-y: auto;
+  font-family: 'Times New Roman', Times, serif; /* A more formal font for documents */
+  font-size: 1.1rem;
+  line-height: 1.6;
+  background-color: #fff;
+}
+
+.preview-panel .card-body {
+    padding: 2.5rem 3rem; /* Generous padding for a document feel */
+}
+
+/* --- Interactive Blank Placeholder --- */
+.placeholder-blank {
+  display: inline-block;
+  font-weight: 600;
+  color: #0d6efd; /* Bootstrap primary blue */
+  background-color: #e7f1ff; /* A very light blue background */
+  border-bottom: 1px dashed #0d6efd;
+  padding: 0 0.25em;
+  border-radius: 3px;
+  min-width: 80px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.placeholder-blank:hover {
+    background-color: #cfe2ff;
+    cursor: help;
+}
+
+/* Spinner styling */
+.spinner-container {
+    height: 100%;
+    min-height: 400px;
+}
+
+/* --- Simple Footer --- */
+.footer-simple {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background-color: #ffffff; /* Or #f8f9fa to match a light background */
+  border-top: 1px solid #e2e8f0; /* Same as navbar bottom border */
+  color: #718096; /* Muted gray text */
+  font-size: 0.9rem;
+  font-weight: 500;
+  
+  /* This helps it stick to the bottom of the content */
+  margin-top: auto; 
+}
+
+/* --- App Layout (to make footer stick to bottom) --- */
+.app-layout {
   display: flex;
   flex-direction: column;
-  justify-content: center;  /* centers vertically */
-  align-items: center;      /* centers horizontally */
-  background: #ffffff;
-  padding: 4rem 2rem;
+  min-height: 100vh;
+}
+
+/* --- Home Page Container --- */
+.home-container {
+  /* This makes the content fill the space, pushing the footer down */
+  flex-grow: 1; 
+  
+  /* Center all the content */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  
+  padding: 2rem;
+  background-color: #f8f9fa; /* Light background */
 }
 
 .home-container h1 {
-  font-size: 2.8rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: #1e2a38;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
 }
 
 .home-container p {
-  font-size: 1.2rem;
-  color: #444;
-  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  color: #4a5568;
+  margin-bottom: 2.5rem;
 }
 
+/* --- Home Button Container --- */
 .home-buttons {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.5rem; /* Space between the buttons */
 }
 
+/* --- Interactive Home Buttons --- */
 .home-buttons button {
-  background: #0098ff;
-  color: white;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(145deg, #007bff, #0056b3);
   border: none;
-  padding: 14px 24px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
+  
+  /* Subtle shadow for a "raised" look */
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+  
+  /* Smooth transition for hover effects */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .home-buttons button:hover {
-  background: #0077cc;
+  /* Make the button "pop" on hover */
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+  background: linear-gradient(145deg, #0088ff, #0062cc);
 }
 
+.home-buttons button:active {
+  /* Press-down effect */
+  transform: translateY(0) scale(1);
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
 
-/* --- Success Page Styles (same as Home) --- */
-.success-container {
-  flex: 1;
+/* --- Success Page Layout --- */
+.success-layout {
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* center vertically */
-  align-items: center;       /* center horizontally */
-  background: #ffffff;
-  padding: 4rem 2rem;
-  text-align: center;
+  flex-grow: 1; /* Ensures it takes up space in the app-layout */
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 2rem;
+  width: 100%;
 }
 
-.success-container h1 {
-  font-size: 2.4rem;
-  font-weight: bold;
+.success-container {
+  text-align: center;
+  background-color: #ffffff;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 600px;
+}
+
+.success-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #198754; /* Bootstrap success green */
   margin-bottom: 1rem;
-  color: #1e2a38;
 }
 
 .success-container p {
-  font-size: 1.2rem;
-  color: #444;
+  font-size: 1.15rem;
+  color: #4a5568;
   margin-bottom: 2rem;
 }
 
+/* --- Success Button Container --- */
 .success-buttons {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
+/* On larger screens, stack them side-by-side */
+@media (min-width: 576px) {
+  .success-buttons {
+    flex-direction: row;
+  }
+}
+
+/* --- Success Page Buttons --- */
 .success-buttons button {
-  background: #0098ff;
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 6px;
-  cursor: pointer;
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.success-buttons button:hover {
-  background: #0077cc;
+/* Primary Button - Craft Another */
+.success-buttons button:first-of-type {
+  color: #ffffff;
+  background: linear-gradient(145deg, #007bff, #0056b3);
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+.success-buttons button:first-of-type:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Secondary Button - Redraft */
+.success-buttons button:last-of-type {
+  color: #007bff;
+  background-color: #e7f1ff;
+  border: 1px solid #b3d7ff;
+}
+
+.success-buttons button:last-of-type:hover {
+  background-color: #cfe2ff;
+  transform: translateY(-2px);
 }
 
 /* --- Redraft Box --- */
 .redraft-box {
   margin-top: 2rem;
-  width: 100%;
-  max-width: 600px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
   text-align: left;
 }
 
 .redraft-box h3 {
-  color: #1e2a38;
-  margin-bottom: 0.8rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
 }
 
 .redraft-box textarea {
   width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
   font-size: 1rem;
+  font-family: inherit;
   margin-bottom: 1rem;
-  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.redraft-box textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
 }
 
 .redraft-box button {
-  background: #17a2b8;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 6px;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+  color: #ffffff;
+  background-color: #5a3c94; /* A distinct purple for AI */
+  border: none;
 }
 
 .redraft-box button:hover {
-  background: #138496;
+  background-color: #482f76;
+  transform: translateY(-2px);
 }
 
 /* --- Redraft Preview --- */
 .redraft-preview {
   margin-top: 2rem;
-  padding: 1.5rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 800px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
   text-align: left;
 }
 
 .redraft-preview h3 {
-  margin-bottom: 1rem;
-  color: #1e2a38;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
 }
 
 .contract-preview {
-  padding: 1rem;
-  background: white;
-  border-radius: 6px;
   border: 1px solid #ddd;
-  font-family: "Times New Roman", Times, serif;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-
-
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* ensures footer stays at bottom */
-  width: 100vw;
-}
-
-/* --- Navbar Styles --- */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  height: 60px;
-  background-color: #1e1e1e;
-  color: #ffffff;
-  border-bottom: 2px solid #0098ff;
-  flex-shrink: 0;
-}
-.navbar-brand { font-size: 1.5rem; font-weight: bold; }
-.navbar-right { display: flex; align-items: center; gap: 2.5rem; }
-.navbar-links a {
-  color: #f0f0f0;
-  text-decoration: none;
-  margin-left: 1.5rem;
-  font-size: 1rem;
-  transition: color 0.3s;
-}
-.navbar-links a:hover { color: #0098ff; }
-.navbar-profile { display: flex; align-items: center; gap: 12px; }
-.profile-avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background-color: #007bff; color: white;
-  display: flex; justify-content: center; align-items: center;
-  font-weight: bold; font-size: 1.2rem; cursor: pointer;
-}
-.profile-name { color: #f0f0f0; font-weight: 500; }
-
-/* --- Main Content Area --- */
-.app-container {
-  display: flex;
-  flex-grow: 1; /* fills space between navbar and footer */
-  overflow: hidden; /* prevent body scroll */
-  background-color: #e0e0e0;
-}
-
-/* --- Left Panel: Form Section --- */
-.form-section {
-  background-color: #0e0e0e;
-  color: #fff;
-  padding: 20px;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  padding: 1.5rem 2rem;
+  max-height: 400px;
   overflow-y: auto;
-  resize: horizontal;
-  min-width: 300px;
-  max-width: 600px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1rem;
+  line-height: 1.5;
+} 
+
+.success-container {
+  max-width: 700px;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  font-family: Arial, sans-serif;
 }
 
-.form-section h2 {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin: 0 0 1.5rem 0;
-  color: #0098ff;
-  text-align: center;
+.loader-container {
+  margin: 20px auto;
 }
-.form-section-header {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #0098ff;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #444;
-}
-.form-field { display: flex; flex-direction: column; margin-bottom: 1rem; }
-.form-section label { font-size: 0.9rem; margin-bottom: 8px; font-weight: 500; }
-.form-section input, .form-section select {
-  padding: 12px;
-  border-radius: 5px;
-  border: 1px solid #444;
-  background: #333;
-  color: #f0f0f0;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  font-family: inherit;
-}
-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-.form-section input:focus, .form-section select:focus {
-  outline: none;
-  border-color: #0098ff;
-  box-shadow: 0 0 0 3px rgba(0, 152, 255, 0.25);
-}
-.file-input {
-  width: 0.1px; height: 0.1px; opacity: 0;
-  overflow: hidden; position: absolute; z-index: -1;
-}
-.file-input-label {
-  display: block;
-  text-align: center;
-  padding: 12px;
-  background-color: #007bff;
+
+.success-buttons button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #4b9ce2;
   color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-.file-input-label:hover { background-color: #0056b3; }
-.form-section button {
-  background: #17a2b8;
-  color: white;
-  padding: 14px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: 2rem;
-  transition: background-color 0.3s;
+  transition: 0.3s;
 }
-.form-section button:hover { background: #138496; }
 
-/* --- Right Panel: Preview Section --- */
-.preview-section {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto; /* only preview scrolls */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* prevents content from floating */
+.success-buttons button:hover {
+  background-color: #357ab8;
 }
-.preview-content {
-  background: white;
+
+.redraft-box {
+  margin-top: 20px;
+}
+
+.redraft-box textarea {
   width: 100%;
-  max-width: 850px;
-  height: auto;  /* let content decide */
-  padding: 50px 60px;
-  border-radius: 3px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  font-family: 'Times New Roman', Times, serif !important;
-  font-size: 12pt !important;
-}
-.preview-content, .preview-content * {
-  color: #111 !important;
-  background-color: transparent !important;
-  text-align: justify !important;
-  margin-inline-start: 0 !important;
-}
-.preview-content p[style*="margin-left:108pt"] {
-  text-align: center !important;
-  margin-left: 0 !important;
-  text-indent: 0 !important;
-}
-.signature-image {
-  max-width: 200px;
-  height: auto;
-  max-height: 80px;
+  padding: 10px;
+  font-size: 14px;
 }
 
-/* --- Footer --- */
-.footer-simple {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  background-color: #1e1e1e;
-  color: #aaa;
-  font-size: 0.9rem;
-  flex-shrink: 0; /* stick at bottom */
+.redraft-box button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #4b9ce2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }

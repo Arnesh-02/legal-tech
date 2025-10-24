@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader"; // stylish spinner
 
 function Success() {
   const location = useLocation();
@@ -7,9 +8,13 @@ function Success() {
 
   const [instructions, setInstructions] = useState("");
   const [showRedraftBox, setShowRedraftBox] = useState(false);
+  const [loading, setLoading] = useState(false); // <-- loading state
   const [redrafted, setRedrafted] = useState(null);
+  const [message, setMessage] = useState("");
 
   const handleRedraft = async () => {
+    setLoading(true);
+    setMessage("Redrafting your contract...");
     try {
       const response = await fetch("http://127.0.0.1:5000/redraft", {
         method: "POST",
@@ -23,67 +28,80 @@ function Success() {
       const data = await response.json();
       if (data.redrafted_html) {
         setRedrafted(data.redrafted_html);
-
-        // Auto download PDF
-        const res2 = await fetch("http://127.0.0.1:5000/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ html: data.redrafted_html }),
-        });
-
-        const blob = await res2.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "redrafted_agreement.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        setMessage("Redraft complete! Click the button below to download.");
       }
     } catch (err) {
       console.error("Redraft error:", err);
+      setMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadPDF = async () => {
+    if (!redrafted) return;
+
+    setLoading(true);
+    setMessage("Generating PDF...");
+    try {
+      const res = await fetch("http://127.0.0.1:5000/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html: redrafted }),
+      });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "redrafted_agreement.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setMessage("PDF downloaded successfully ✅");
+    } catch (err) {
+      console.error("PDF download error:", err);
+      setMessage("Failed to generate PDF.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="success-layout">
-      <main className="success-container">
-        <h2>Download Complete ✅</h2>
-        <p>Your document has been successfully downloaded.</p>
+    <main className="success-container">
+      <h2>Document Ready</h2>
+      <p>{message}</p>
 
-        <div className="success-buttons">
-          <button onClick={() => navigate("/generate")}>
-            Craft Another Document
-          </button>
-          <button onClick={() => setShowRedraftBox(true)}>
-            Redraft using AI
-          </button>
+      {loading && (
+        <div className="loader-container">
+          <ClipLoader color="#4B9CE2" size={60} />
         </div>
+      )}
 
-        {showRedraftBox && (
-          <div className="redraft-box">
-            <h3>Enter your requirements:</h3>
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              rows="5"
-              placeholder="e.g., Make it more formal and add a clause"
-            />
-            <button onClick={handleRedraft}>Submit Redraft</button>
-          </div>
-        )}
-
+      <div className="success-buttons">
+        <button onClick={() => navigate("/generate-nda")}>
+          Craft Another Document
+        </button>
         {redrafted && (
-          <div className="redraft-preview">
-            <h3>Redrafted Contract Preview:</h3>
-            <div
-              dangerouslySetInnerHTML={{ __html: redrafted }}
-              className="contract-preview"
-            />
-          </div>
+          <button onClick={downloadPDF}>Download Redrafted PDF</button>
         )}
-      </main>
-    </div>
+        <button onClick={() => setShowRedraftBox(true)}>Redraft using AI</button>
+      </div>
+
+      {showRedraftBox && (
+        <div className="redraft-box">
+          <h3>Enter your requirements:</h3>
+          <textarea
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            rows="5"
+            placeholder="e.g., Make it more formal and add a clause"
+          />
+          <button onClick={handleRedraft}>Submit Redraft</button>
+        </div>
+      )}
+    </main>
   );
 }
 

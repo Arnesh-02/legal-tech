@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const navigate = useNavigate();
   return (
     <nav className="navbar">
-      <div className="navbar-brand">Legal Tech</div>
+      <div className="navbar-brand" onClick={() => navigate("/home")}>Legal Tech</div>
       <div className="navbar-right">
         <div className="navbar-links">
           <a href="/">Home</a>

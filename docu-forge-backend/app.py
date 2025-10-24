@@ -5,9 +5,18 @@ from io import BytesIO
 import os
 import re # <-- Import Regular Expressions
 
+# Import the blueprint
+from redraft import redraft_bp
+
 app = Flask(__name__)
-CORS(app) 
+
+# Enable CORS globally for all routes (including blueprint routes)
+CORS(app, origins=["http://localhost:5173"])  
+
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+# Register the blueprint
+app.register_blueprint(redraft_bp)
 
 @app.route("/get-template/<name>", methods=["GET"])
 def get_template(name):
@@ -127,5 +136,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
+    app.run(debug=True)
