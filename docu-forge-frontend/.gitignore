@@ -1,6 +1,7 @@
 # Logs
 .idea/
 .node_modules/
+.vi
 
 logs
 *.log

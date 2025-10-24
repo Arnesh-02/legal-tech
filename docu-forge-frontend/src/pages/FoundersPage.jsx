@@ -1,44 +1,67 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import "../App.css"; // Removed this line to fix compilation error
+
+/**
+ * ✅ Final Integrated Version — FoundersPage.jsx (No Signatures)
+ * Features:
+ * - Fetches Founder Agreement template from backend
+ * - Replaces {{ placeholders }} with live form data
+ * - Shows blank underlines (_____) for empty fields
+ * - Live preview updates instantly
+ * - Download as PDF via backend
+ */
 
 function FoundersPage() {
   const navigate = useNavigate();
-
-  const today = new Date();
-  const isoToday = today.toISOString().split("T")[0];
+  const todayIso = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
-    // --- Date Fields ---
-    EFFECTIVE_DATE: isoToday,
-
-    // --- Company Details ---
+    EFFECTIVE_DATE: todayIso,
     COMPANY_NAME: "",
     COMPANY_ADDRESS: "",
-    COMPANY_SIGNATURE: null,
     COMPANY_SIGNATORY_NAME: "",
     COMPANY_SIGNATORY_DESIGNATION: "",
-
-    // --- Founder Details ---
     FOUNDER_NAME: "",
     FOUNDER_ADDRESS: "",
     FOUNDER_DESIGNATION: "",
     FOUNDER_SALARY: "",
     FOUNDER_SALARY_WORDS: "",
-    FOUNDER_SIGNATURE: null,
-
-    // --- Agreement Terms ---
     NONCOMPETE_PERIOD: "12",
     NOTICE_PERIOD: "30",
     SEVERANCE_AMOUNT: "1",
-    JURISDICTION_CITY: "Bangalore",
+    JURISDICTION_CITY: "Chennai",
   });
 
   const [template, setTemplate] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // ✅ Fetch template once
+  // Mapping between template placeholders and form keys
+  // We use this for the LIVE PREVIEW replacement.
+  const ALIASES = {
+    "company.name": "COMPANY_NAME",
+    "company.address": "COMPANY_ADDRESS",
+    "authorized.signatory.name": "COMPANY_SIGNATORY_NAME",
+    "authorized.signatory.designation": "COMPANY_SIGNATORY_DESIGNATION",
+    "founder.name": "FOUNDER_NAME",
+    "founder.address": "FOUNDER_ADDRESS",
+    "founder.designation": "FOUNDER_DESIGNATION",
+    "founder.salary": "FOUNDER_SALARY",
+    "founder.salary.words": "FOUNDER_SALARY_WORDS",
+    "noncompete.period": "NONCOMPETE_PERIOD",
+    "notice.period": "NOTICE_PERIOD",
+    "severance.amount": "SEVERANCE_AMOUNT",
+    "effective.date": "EFFECTIVE_DATE",
+    "jurisdiction.city": "JURISDICTION_CITY",
+  };
+
+  const placeholderToKey = (ph) => {
+    const clean = ph.trim();
+    return ALIASES[clean] || clean.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase();
+  };
+
+  // Fetch the Founder template from backend
   useEffect(() => {
+    // Make sure your backend server is running on http://127.0.0.1:5000
     fetch("http://127.0.0.1:5000/get-template/founders")
       .then((res) => res.text())
       .then((text) => {
@@ -47,182 +70,185 @@ function FoundersPage() {
       })
       .catch((err) => {
         console.error("Error fetching template:", err);
-        setTemplate("<p>Error loading template. Please check the backend.</p>");
+        setTemplate("<p>Error loading template. Please check backend.</p>");
         setIsLoading(false);
       });
   }, []);
 
-  // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Simplified handler as we don't need to split date fields for this template
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // ✅ Handle signature upload
-  const handleSignatureUpload = (e, party) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // Underline span for empty fields
+  const blankSpan = (key, approxLen = 12) =>
+    `<span class="placeholder-blank" data-key="${key}">${"_".repeat(
+      approxLen
+    )}</span>`;
 
-    const reader = new FileReader();
-    reader.onload = () =>
-      setFormData((prev) => ({ ...prev, [party]: reader.result }));
-    reader.readAsDataURL(file);
-  };
-
-  // ✅ Generate dynamic preview
+  // Build the live preview from template
   const getPreview = () => {
-    if (isLoading) return "<p>Loading template...</p>";
+    if (isLoading) return "<p>Loading template…</p>";
+    if (!template) return "<p>No template loaded.</p>";
 
     let preview = template;
+    // This regex finds placeholders like {{ company.name }}
+    const regex = /{{\s*([^}]+)\s*}}/g;
 
-    // --- Handle Image Placeholders First ---
-    const companySigHtml = formData.COMPANY_SIGNATURE
-      ? `<img src="${formData.COMPANY_SIGNATURE}" class="signature-image" alt="Signature" />`
-      : "<u>__________</u>";
-    // Replace the company signature placeholder
-    preview = preview.replace("{{ company.authorized_signatory.signature }}", companySigHtml);
+    preview = preview.replace(regex, (match, p1) => {
+      // p1 is the text inside {{ }}, e.g., "company.name"
+      const key = placeholderToKey(p1); // Converts "company.name" to "COMPANY_NAME"
+      const value = formData[key];
 
-    const founderSigHtml = formData.FOUNDER_SIGNATURE
-      ? `<img src="${formData.FOUNDER_SIGNATURE}" class="signature-image" alt="Signature" />`
-      : "<u>__________</u>";
-    // This specifically targets the typo in your template's founder signature block
-    // It replaces "Signature{{ authorized.signatory.name }}" with the image
-    preview = preview.replace("Signature{{ authorized.signatory.name }}", `Signature: ${founderSigHtml}`);
+      // Handle normal text placeholders
+      if (value && value !== "") {
+        // Escape HTML safely for text fields
+        const escaped = String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        return escaped;
+      }
 
-    // --- Handle Text Placeholders ---
-    // These keys now match your template and have no duplicates
-    const replacements = {
-      "{{ effective.date }}": formData.EFFECTIVE_DATE,
-      "{{ company.name }}": formData.COMPANY_NAME,
-      "{{ company.address }}": formData.COMPANY_ADDRESS,
-      "{{ founder.name }}": formData.FOUNDER_NAME,
-      "{{ founder.address }}": formData.FOUNDER_ADDRESS,
-      "{{ founder.designation }}": formData.FOUNDER_DESIGNATION,
-      "{{ founder.salary }}": formData.FOUNDER_SALARY,
-      "{{ founder.salary.words }}": formData.FOUNDER_SALARY_WORDS,
-      "{{ noncompete.period }}": formData.NONCOMPETE_PERIOD,
-      "{{ notice.period }}": formData.NOTICE_PERIOD,
-      "{{ severance.amount }}": formData.SEVERANCE_AMOUNT,
-      "{{ jurisdiction.city }}": formData.JURISDICTION_CITY,
-      // This key is now unique and only maps to the company signatory name
-      "{{ authorized.signatory.name }}": formData.COMPANY_SIGNATORY_NAME,
-      "{{ authorized.signatory.designation }}": formData.COMPANY_SIGNATORY_DESIGNATION,
-    };
-
-    // Apply all text replacements
-    for (const key in replacements) {
-        // Create a global regex from the key to replace all occurrences
-        const regex = new RegExp(key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
-        preview = preview.replace(regex, replacements[key] || "<u>__________</u>");
-    }
+      // Handle empty values → underline placeholder
+      return blankSpan(key, Math.min(20, Math.max(10, p1.length)));
+    });
 
     return preview;
   };
 
-  // ✅ Download PDF
-  const handleDownloadPDF = async () => {
+  // Download as PDF
+   const handleDownloadPDF = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          document_type: "founders", // Corrected to match app.py
-          context: formData, // Send the flat formData
+          document_type: "founders", // This is correct
+          context: formData, // Send the complete form data
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to generate PDF");
+      if (!response.ok) {
+         // Log the server error if possible
+        const errData = await response.text();
+        console.error("Server error:", errData);
+        throw new Error(`Failed to generate PDF: ${response.statusText}`);
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "Founder_Agreement.pdf"; // Corrected download name
+      a.download = "Founders_Agreement.pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
+      window.URL.revokeObjectURL(url); // Clean up the object URL
 
-      navigate("/download-complete");
+      navigate("/download-complete"); // Uncomment if you have this route
     } catch (err) {
       console.error("Error generating PDF:", err);
+      alert("Error generating PDF. Check the console for details.");
     }
   };
 
-  // Helper for creating form fields
-  const renderField = (key, label, type = "text") => (
-    <div className="form-field" key={key}>
-      <label>{label}</label>
+  const renderField = (key, label, type = "text", placeholder = "") => (
+    <div className="form-field" key={key} style={{ marginBottom: 10 }}>
+      <label style={{ display: "block", fontWeight: 600 }}>{label}</label>
       <input
         type={type}
         name={key}
-        value={formData[key]}
+        // Use formData[key] or fallback to empty string if it's null/undefined
+        value={formData[key] || ""}
         onChange={handleChange}
+        placeholder={placeholder}
+        style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
       />
     </div>
   );
 
   return (
-    <div className="app-container">
-      {/* Left panel */}
-      <div className="form-section">
+    <div
+      style={{ display: "flex", gap: 24, padding: 24, fontFamily: "sans-serif" }}
+    >
+      <style>{`
+        .preview-panel {
+          width: 60%;
+          border: 1px solid #ddd;
+          padding: 18px;
+          border-radius: 6px;
+          background: #fff;
+          max-height: 80vh;
+          overflow: auto;
+        }
+        .form-panel { width: 40%; max-height: 80vh; overflow: auto; }
+        .placeholder-blank {
+          display: inline-block;
+          min-width: 100px;
+          height: 1.2em;
+          vertical-align: bottom;
+          /* You can add a border-bottom here if you want underlines */
+          /* border-bottom: 1px solid #888; */
+        }
+        /* Signature styles are no longer needed */
+      `}</style>
+
+      {/* Left Panel - Form */}
+      <div className="form-panel">
         <h2>Fill Founder Agreement</h2>
 
-        <h3>Agreement Details</h3>
-        {renderField("EFFECTIVE_DATE", "Effective Date", "date")}
-        {renderField("JURISDICTION_CITY", "Jurisdiction City")}
+        <section>
+          <h4>Agreement Details</h4>
+          {renderField("EFFECTIVE_DATE", "Effective Date", "date")}
+          {renderField("JURISDICTION_CITY", "Jurisdiction City")}
+        </section>
 
-        <h3>Company Details</h3>
-        {renderField("COMPANY_NAME", "Company Name")}
-        {renderField("COMPANY_ADDRESS", "Company Address")}
-        {renderField("COMPANY_SIGNATORY_NAME", "Signatory Name")}
-        {renderField("COMPANY_SIGNATORY_DESIGNATION", "Signatory Designation")}
-        <div className="form-field">
-          <label>Company Signature</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleSignatureUpload(e, "COMPANY_SIGNATURE")}
-          />
+        <section>
+          <h4>Company Details</h4>
+          {renderField("COMPANY_NAME", "Company Name")}
+          {renderField("COMPANY_ADDRESS", "Company Address")}
+          {renderField("COMPANY_SIGNATORY_NAME", "Authorized Signatory Name")}
+          {renderField("COMPANY_SIGNATORY_DESIGNATION", "Signatory Designation")}
+          {/* Signature upload removed */}
+        </section>
+
+        <section>
+          <h4>Founder Details</h4>
+          {renderField("FOUNDER_NAME", "Founder Name")}
+          {renderField("FOUNDER_ADDRESS", "Founder Address")}
+          {renderField("FOUNDER_DESIGNATION", "Founder Designation")}
+          {renderField("FOUNDER_SALARY", "Salary (₹)", "number")}
+          {renderField("FOUNDER_SALARY_WORDS", "Salary in Words")}
+          {/* Signature upload removed */}
+        </section>
+
+        <section>
+          <h4>Agreement Terms</h4>
+          {renderField("NONCOMPETE_PERIOD", "Non-Compete (months)", "number")}
+          {renderField("NOTICE_PERIOD", "Notice Period (days)", "number")}
+          {renderField("SEVERANCE_AMOUNT", "Severance (months)", "number")}
+        </section>
+
+        <div style={{ marginTop: 20 }}>
+          <button
+            onClick={handleDownloadPDF}
+            style={{ padding: "10px 14px", cursor: "pointer" }}
+          >
+            Download PDF
+          </button>
         </div>
-
-        <h3>Founder Details</h3>
-        {renderField("FOUNDER_NAME", "Founder Name")}
-        {renderField("FOUNDER_ADDRESS", "Founder Address")}
-        {renderField("FOUNDER_DESIGNATION", "Founder Designation")}
-        {renderField("FOUNDER_SALARY", "Salary (e.g., 1200000)")}
-        {renderField("FOUNDER_SALARY_WORDS", "Salary in Words (e.g., Twelve Lakh)")}
-         <div className="form-field">
-          <label>Founder Signature</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleSignatureUpload(e, "FOUNDER_SIGNATURE")}
-          />
-        </div>
-
-        <h3>Agreement Terms</h3>
-        {renderField("NONCOMPETE_PERIOD", "Non-Compete Period (Months)", "number")}
-        {renderField("NOTICE_PERIOD", "Notice Period (Days)", "number")}
-        {renderField("SEVERANCE_AMOUNT", "Severance (Months)", "number")}
-        
-        <button onClick={handleDownloadPDF}>Download PDF</button>
       </div>
 
-      {/* Right panel - Live preview */}
-      <div className="preview-section">
-        <div
-          id="contract-preview"
-          dangerouslySetInnerHTML={{ __html: getPreview() }}
-        />
-      </div>
+      {/* Right Panel - Preview */}
+      <div
+        className="preview-panel"
+        id="contract-preview"
+        dangerouslySetInnerHTML={{ __html: getPreview() }}
+      />
     </div>
   );
 }
 
 export default FoundersPage;
-
 
